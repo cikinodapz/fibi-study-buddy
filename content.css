@@ -2,11 +2,13 @@
   position: fixed;
   bottom: 20px;
   right: 20px;
-  z-index: 2147483647; /* z-index tertinggi agar selalu di atas */
+  z-index: 2147483647 !important; /* z-index tertinggi agar selalu di atas, pakai !important */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  pointer-events: none !important; /* Membiarkan klik tembus ke web kamu jika tidak mengenai widget */
 }
 
 .fibi-widget {
+  pointer-events: auto !important; /* Fibi tetap bisa diklik */
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);

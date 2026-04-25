@@ -36,8 +36,8 @@ function injectUI() {
   let xOffset = 0;
   let yOffset = 0;
 
-  const dragHandle = document.querySelector('.fibi-drag-handle');
-  const widget = document.querySelector('.fibi-widget');
+  const dragHandle = appContainer.querySelector('.fibi-drag-handle');
+  const widget = appContainer.querySelector('.fibi-widget');
 
   dragHandle.addEventListener("mousedown", dragStart);
   document.addEventListener("mouseup", dragEnd);
