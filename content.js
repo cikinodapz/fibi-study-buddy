@@ -105,20 +105,36 @@ function injectUI() {
             <circle cx="8" cy="20" r="2.5"></circle><circle cx="16" cy="20" r="2.5"></circle>
           </svg>
         </div>
-        <div class="fibi-minimize-btn" title="Sembunyikan Fibi">▼</div>
+        <div class="fibi-header-actions">
+          <div class="fibi-settings-toggle" title="Pengaturan Timer">⚙️</div>
+          <div class="fibi-minimize-btn" title="Sembunyikan Fibi">▼</div>
+        </div>
       </div>
       <div class="fibi-body">
-        <div class="fibi-char">
-          <!-- Jika gambar gagal dimuat, akan menampilkan alt text -->
-          <img src="${imgFocusUrl1}" id="fibi-img" alt="Phoebe">
+        <div class="fibi-main-view">
+          <div class="fibi-char">
+            <!-- Jika gambar gagal dimuat, akan menampilkan alt text -->
+            <img src="${imgFocusUrl1}" id="fibi-img" alt="Phoebe">
+          </div>
+          <div class="fibi-timer">
+            <span id="fibi-time">25:00</span>
+          </div>
+          <div class="fibi-controls">
+            <button id="fibi-start" title="Mulai">▶</button>
+            <button id="fibi-pause" style="display:none;" title="Jeda">⏸</button>
+            <button id="fibi-reset" title="Reset">↻</button>
+          </div>
         </div>
-        <div class="fibi-timer">
-          <span id="fibi-time">25:00</span>
-        </div>
-        <div class="fibi-controls">
-          <button id="fibi-start" title="Mulai">▶</button>
-          <button id="fibi-pause" style="display:none;" title="Jeda">⏸</button>
-          <button id="fibi-reset" title="Reset">↻</button>
+        <div class="fibi-settings-view" style="display:none;">
+          <div class="fibi-setting-row">
+            <label>Focus (m):</label>
+            <input type="number" id="fibi-focus-input" value="25" min="1" max="120">
+          </div>
+          <div class="fibi-setting-row">
+            <label>Break (m):</label>
+            <input type="number" id="fibi-break-input" value="5" min="1" max="60">
+          </div>
+          <button id="fibi-save-settings">Simpan</button>
         </div>
       </div>
     </div>
@@ -230,13 +246,60 @@ function injectUI() {
     safeSendMessage({ type: 'RESET' });
   });
 
+  const settingsToggleBtn = appContainer.querySelector('.fibi-settings-toggle');
+  const mainView = appContainer.querySelector('.fibi-main-view');
+  const settingsView = appContainer.querySelector('.fibi-settings-view');
+  const saveSettingsBtn = document.getElementById('fibi-save-settings');
+
+  settingsToggleBtn.addEventListener('click', () => {
+    const isShowingSettings = settingsView.style.display === 'flex';
+    if (isShowingSettings) {
+      settingsView.style.display = 'none';
+      mainView.style.display = 'flex';
+    } else {
+      mainView.style.display = 'none';
+      settingsView.style.display = 'flex';
+    }
+  });
+
+  saveSettingsBtn.addEventListener('click', () => {
+    const fVal = document.getElementById('fibi-focus-input').value;
+    const bVal = document.getElementById('fibi-break-input').value;
+    
+    saveSettingsBtn.textContent = '...';
+    safeSendMessage({
+      type: 'UPDATE_SETTINGS',
+      settings: {
+        focusMinutes: fVal,
+        breakMinutes: bVal
+      }
+    }, () => {
+      saveSettingsBtn.textContent = 'Simpan';
+      settingsView.style.display = 'none';
+      mainView.style.display = 'flex';
+    });
+  });
+
   // Get initial state
   safeSendMessage({ type: 'GET_STATE' }, updateUI);
 }
 
-function updateUI(state) {
-  if (!state) return;
-  currentState = state; // Simpan state terbaru
+function updateUI(payload) {
+  if (!payload) return;
+  
+  if (payload.timerState) {
+    currentState = payload.timerState;
+    if (payload.fibiSettings) {
+      const fInput = document.getElementById('fibi-focus-input');
+      const bInput = document.getElementById('fibi-break-input');
+      if (fInput) fInput.value = payload.fibiSettings.focusMinutes;
+      if (bInput) bInput.value = payload.fibiSettings.breakMinutes;
+    }
+  } else {
+    currentState = payload;
+  }
+
+  const state = currentState;
   
   renderTime();
 

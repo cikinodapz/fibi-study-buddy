@@ -51,6 +51,33 @@
   fill: #666 !important;
 }
 
+.fibi-header-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.fibi-settings-toggle {
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px;
+  background: rgba(0,0,0,0.05);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  transition: all 0.2s;
+  color: transparent;
+  text-shadow: 0 0 0 #666; /* Mewarnai emoji ⚙️ */
+}
+.fibi-settings-toggle:hover {
+  background: rgba(0,0,0,0.1);
+  text-shadow: 0 0 0 #000;
+}
+
 .fibi-minimize-btn {
   cursor: pointer;
   color: #666;
@@ -76,6 +103,77 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
+}
+
+.fibi-main-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.fibi-settings-view {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 10px 0 5px 0;
+  gap: 10px;
+  animation: fibi-fade-in 0.3s;
+}
+
+@keyframes fibi-fade-in {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fibi-setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #555;
+  font-weight: 600;
+}
+
+.fibi-setting-row input {
+  width: 45px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 4px;
+  font-size: 11px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.8);
+  color: #333;
+  outline: none;
+}
+.fibi-setting-row input:focus {
+  border-color: #FFD700;
+}
+
+#fibi-save-settings {
+  margin-top: 5px;
+  background: linear-gradient(135deg, #FFD700 0%, #F4C430 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 8px 0;
+  color: #333;
+  font-weight: bold;
+  font-size: 11px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(244, 196, 48, 0.4);
+  transition: transform 0.1s;
+}
+#fibi-save-settings:hover {
+  transform: scale(1.05);
+}
+#fibi-save-settings:active {
+  transform: scale(0.95);
+}
+
+.fibi-break-mode #fibi-save-settings {
+  background: linear-gradient(135deg, #4CAF50 0%, #43A047 100%);
+  color: white;
+  box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
 }
 
 .fibi-minimized {
@@ -195,5 +293,28 @@
   .fibi-minimize-btn:hover {
     color: #fff;
     background: rgba(255, 255, 255, 0.2);
+  }
+
+  .fibi-settings-toggle {
+    text-shadow: 0 0 0 #aaa;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .fibi-settings-toggle:hover {
+    text-shadow: 0 0 0 #fff;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .fibi-setting-row {
+    color: #ddd;
+  }
+
+  .fibi-setting-row input {
+    background: rgba(0, 0, 0, 0.5);
+    border-color: #555;
+    color: #fff;
+  }
+  .fibi-setting-row input:focus {
+    border-color: #FFB300;
   }
 }
