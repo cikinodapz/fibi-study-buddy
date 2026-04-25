@@ -12,7 +12,12 @@ Berbeda dengan ekstensi Pomodoro biasa yang berupa *pop-up* dan mudah tertutup s
 - 🎨 **Floating & Draggable Widget:** Widget melayang yang bisa kamu geser-geser (*drag*) ke mana saja di layar agar tidak menghalangi pekerjaanmu.
 - 🎭 **Dynamic Character State:**
   - **Focus Mode:** Fibi akan menemanimu fokus dengan gaya serius (sedang menulis/belajar).
+    
+    <img src="assets/focus.png" width="200" alt="Fibi Focus Mode">
+
   - **Break Mode:** Fibi akan berubah menjadi mode santai (rebahan di beanbag sambil minum teh).
+    
+    <img src="assets/break.png" width="200" alt="Fibi Break Mode">
 - 🔔 **Notifikasi Otomatis:** Memberitahukan kapan waktunya bekerja dan kapan waktunya istirahat (meskipun kamu sedang membuka tab lain).
 - ⚡ **Ringan & Cepat:** Dibangun murni menggunakan Vanilla JavaScript dan CSS tanpa membebani browser.
 
