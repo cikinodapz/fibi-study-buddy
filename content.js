@@ -1,7 +1,48 @@
 let appContainer = null;
 // Menggunakan gambar phoebe yang kamu lampirkan
-let imgFocusUrl = chrome.runtime.getURL('assets/focus.png');
-let imgBreakUrl = chrome.runtime.getURL('assets/break.png');
+let imgFocusUrl1 = chrome.runtime.getURL('assets/focus.png');
+let imgFocusUrl2 = chrome.runtime.getURL('assets/focus2.png');
+let imgBreakUrl1 = chrome.runtime.getURL('assets/break.png');
+let imgBreakUrl2 = chrome.runtime.getURL('assets/break2.png');
+
+let animToggleState = false;
+let animInterval = null;
+let currentModeAnim = null;
+
+function startAnimation(mode) {
+  if (currentModeAnim === mode && animInterval) return;
+  
+  stopAnimation();
+
+  currentModeAnim = mode;
+  animToggleState = true;
+  
+  const imgEl = document.getElementById('fibi-img');
+  if (imgEl) {
+    imgEl.src = mode === 'focus' ? imgFocusUrl1 : imgBreakUrl1;
+  }
+
+  animInterval = setInterval(() => {
+    const el = document.getElementById('fibi-img');
+    if (el) {
+      animToggleState = !animToggleState;
+      if (mode === 'focus') {
+        el.src = animToggleState ? imgFocusUrl2 : imgFocusUrl1;
+      } else {
+        el.src = animToggleState ? imgBreakUrl2 : imgBreakUrl1;
+      }
+    }
+  }, 400); // Ganti frame tiap 400ms
+}
+
+function stopAnimation() {
+  if (animInterval) {
+    clearInterval(animInterval);
+    animInterval = null;
+    currentModeAnim = null;
+    animToggleState = false;
+  }
+}
 
 function injectUI() {
   if (document.getElementById('fibi-pomodoro-root')) return;
@@ -13,7 +54,7 @@ function injectUI() {
       <div class="fibi-drag-handle">≡ Drag ≡</div>
       <div class="fibi-char">
         <!-- Jika gambar gagal dimuat, akan menampilkan alt text -->
-        <img src="${imgFocusUrl}" id="fibi-img" alt="Phoebe">
+        <img src="${imgFocusUrl1}" id="fibi-img" alt="Phoebe">
       </div>
       <div class="fibi-timer">
         <span id="fibi-time">25:00</span>
@@ -68,19 +109,37 @@ function injectUI() {
     }
   }
 
+  // Helper untuk mengirim pesan dengan aman (menghindari error saat ekstensi di-reload)
+  function safeSendMessage(message, callback) {
+    try {
+      if (chrome.runtime && chrome.runtime.sendMessage) {
+        if (callback) {
+          chrome.runtime.sendMessage(message, callback);
+        } else {
+          chrome.runtime.sendMessage(message);
+        }
+      } else {
+        throw new Error("Context invalid");
+      }
+    } catch (err) {
+      console.warn("Fibi Extension: Context hilang (biasanya karena ekstensi baru di-update). Refresh halaman ya!");
+      alert("Fibi baru saja di-update! Silakan refresh (F5) halaman ini agar Fibi bisa nyambung lagi.");
+    }
+  }
+
   // Setup Controls
   document.getElementById('fibi-start').addEventListener('click', () => {
-    chrome.runtime.sendMessage({ type: 'START' });
+    safeSendMessage({ type: 'START' });
   });
   document.getElementById('fibi-pause').addEventListener('click', () => {
-    chrome.runtime.sendMessage({ type: 'PAUSE' });
+    safeSendMessage({ type: 'PAUSE' });
   });
   document.getElementById('fibi-reset').addEventListener('click', () => {
-    chrome.runtime.sendMessage({ type: 'RESET' });
+    safeSendMessage({ type: 'RESET' });
   });
 
   // Get initial state
-  chrome.runtime.sendMessage({ type: 'GET_STATE' }, updateUI);
+  safeSendMessage({ type: 'GET_STATE' }, updateUI);
 }
 
 function updateUI(state) {
@@ -109,10 +168,10 @@ function updateUI(state) {
 
   if (state.mode === 'break') {
     if(widget) widget.classList.add('fibi-break-mode');
-    if(imgEl && imgEl.src !== imgBreakUrl) imgEl.src = imgBreakUrl;
+    startAnimation('break');
   } else {
     if(widget) widget.classList.remove('fibi-break-mode');
-    if(imgEl && imgEl.src !== imgFocusUrl) imgEl.src = imgFocusUrl;
+    startAnimation('focus');
   }
 }
 
