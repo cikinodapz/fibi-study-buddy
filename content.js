@@ -9,6 +9,40 @@ let animToggleState = false;
 let animInterval = null;
 let currentModeAnim = null;
 
+let currentState = null;
+let localTimerInterval = null;
+
+function startLocalTimer() {
+  if (localTimerInterval) return;
+  localTimerInterval = setInterval(() => {
+    if (currentState && currentState.isRunning) {
+      renderTime();
+    }
+  }, 1000);
+}
+
+function stopLocalTimer() {
+  if (localTimerInterval) {
+    clearInterval(localTimerInterval);
+    localTimerInterval = null;
+  }
+}
+
+function renderTime() {
+  if (!currentState) return;
+  let displayTimeLeft = currentState.timeLeft;
+  if (currentState.isRunning && currentState.targetTime > 0) {
+    displayTimeLeft = Math.max(0, Math.round((currentState.targetTime - Date.now()) / 1000));
+  }
+
+  const minutes = Math.floor(displayTimeLeft / 60);
+  const seconds = displayTimeLeft % 60;
+  const timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  
+  const timeEl = document.getElementById('fibi-time');
+  if(timeEl) timeEl.textContent = timeStr;
+}
+
 function startAnimation(mode) {
   if (currentModeAnim === mode && animInterval) return;
   
@@ -51,18 +85,29 @@ function injectUI() {
   appContainer.id = 'fibi-pomodoro-root';
   appContainer.innerHTML = `
     <div class="fibi-widget">
-      <div class="fibi-drag-handle">≡ Drag ≡</div>
-      <div class="fibi-char">
-        <!-- Jika gambar gagal dimuat, akan menampilkan alt text -->
-        <img src="${imgFocusUrl1}" id="fibi-img" alt="Phoebe">
+      <div class="fibi-header">
+        <div class="fibi-drag-handle" title="Tahan untuk menggeser">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="#bbb">
+            <circle cx="8" cy="4" r="2.5"></circle><circle cx="16" cy="4" r="2.5"></circle>
+            <circle cx="8" cy="12" r="2.5"></circle><circle cx="16" cy="12" r="2.5"></circle>
+            <circle cx="8" cy="20" r="2.5"></circle><circle cx="16" cy="20" r="2.5"></circle>
+          </svg>
+        </div>
+        <div class="fibi-minimize-btn" title="Sembunyikan Fibi">▼</div>
       </div>
-      <div class="fibi-timer">
-        <span id="fibi-time">25:00</span>
-      </div>
-      <div class="fibi-controls">
-        <button id="fibi-start" title="Mulai">▶</button>
-        <button id="fibi-pause" style="display:none;" title="Jeda">⏸</button>
-        <button id="fibi-reset" title="Reset">↻</button>
+      <div class="fibi-body">
+        <div class="fibi-char">
+          <!-- Jika gambar gagal dimuat, akan menampilkan alt text -->
+          <img src="${imgFocusUrl1}" id="fibi-img" alt="Phoebe">
+        </div>
+        <div class="fibi-timer">
+          <span id="fibi-time">25:00</span>
+        </div>
+        <div class="fibi-controls">
+          <button id="fibi-start" title="Mulai">▶</button>
+          <button id="fibi-pause" style="display:none;" title="Jeda">⏸</button>
+          <button id="fibi-reset" title="Reset">↻</button>
+        </div>
       </div>
     </div>
   `;
@@ -78,7 +123,35 @@ function injectUI() {
   let yOffset = 0;
 
   const dragHandle = appContainer.querySelector('.fibi-drag-handle');
+  const minimizeBtn = appContainer.querySelector('.fibi-minimize-btn');
   const widget = appContainer.querySelector('.fibi-widget');
+
+  // Load posisi dan state minimize terakhir dari storage (kalau ada)
+  if (chrome.storage && chrome.storage.local) {
+    chrome.storage.local.get(['fibiWidgetPosition', 'fibiMinimized'], (result) => {
+      if (result.fibiWidgetPosition) {
+        xOffset = result.fibiWidgetPosition.x || 0;
+        yOffset = result.fibiWidgetPosition.y || 0;
+        currentX = xOffset;
+        currentY = yOffset;
+        widget.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+      }
+      if (result.fibiMinimized) {
+        widget.classList.add('fibi-minimized');
+        minimizeBtn.textContent = '▲';
+        minimizeBtn.title = 'Tampilkan Fibi';
+      }
+    });
+  }
+
+  minimizeBtn.addEventListener('click', () => {
+    const isMin = widget.classList.toggle('fibi-minimized');
+    minimizeBtn.textContent = isMin ? '▲' : '▼';
+    minimizeBtn.title = isMin ? 'Tampilkan Fibi' : 'Sembunyikan Fibi';
+    if (chrome.storage && chrome.storage.local) {
+      chrome.storage.local.set({ fibiMinimized: isMin });
+    }
+  });
 
   dragHandle.addEventListener("mousedown", dragStart);
   document.addEventListener("mouseup", dragEnd);
@@ -96,6 +169,13 @@ function injectUI() {
     initialX = currentX;
     initialY = currentY;
     isDragging = false;
+
+    // Simpan posisi terakhir ke storage
+    if (chrome.storage && chrome.storage.local) {
+      chrome.storage.local.set({
+        fibiWidgetPosition: { x: xOffset, y: yOffset }
+      });
+    }
   }
 
   function drag(e) {
@@ -144,12 +224,9 @@ function injectUI() {
 
 function updateUI(state) {
   if (!state) return;
-  const minutes = Math.floor(state.timeLeft / 60);
-  const seconds = state.timeLeft % 60;
-  const timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  currentState = state; // Simpan state terbaru
   
-  const timeEl = document.getElementById('fibi-time');
-  if(timeEl) timeEl.textContent = timeStr;
+  renderTime();
 
   const startBtn = document.getElementById('fibi-start');
   const pauseBtn = document.getElementById('fibi-pause');
@@ -160,10 +237,12 @@ function updateUI(state) {
     if(startBtn) startBtn.style.display = 'none';
     if(pauseBtn) pauseBtn.style.display = 'inline-block';
     if(imgEl) imgEl.classList.add('fibi-bouncing');
+    startLocalTimer();
   } else {
     if(startBtn) startBtn.style.display = 'inline-block';
     if(pauseBtn) pauseBtn.style.display = 'none';
     if(imgEl) imgEl.classList.remove('fibi-bouncing');
+    stopLocalTimer();
   }
 
   if (state.mode === 'break') {
@@ -175,9 +254,9 @@ function updateUI(state) {
   }
 }
 
-// Listen for ticks dari background
+// Listen for state update dari background
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.type === 'TICK') {
+  if (request.type === 'STATE_UPDATE') {
     updateUI(request.state);
   }
 });

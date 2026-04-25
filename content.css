@@ -28,15 +28,62 @@
   background: rgba(232, 245, 233, 0.8);
 }
 
-.fibi-drag-handle {
+.fibi-header {
+  display: flex;
   width: 100%;
-  text-align: center;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fibi-drag-handle {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
   cursor: grab;
-  color: #aaa;
-  font-size: 12px;
-  padding-bottom: 8px;
   user-select: none;
-  font-weight: bold;
+  padding: 4px;
+  margin-left: -4px;
+}
+.fibi-drag-handle svg {
+  transition: fill 0.2s;
+}
+.fibi-drag-handle:hover svg {
+  fill: #666 !important;
+}
+
+.fibi-minimize-btn {
+  cursor: pointer;
+  color: #666;
+  font-size: 10px;
+  padding: 4px;
+  background: rgba(0,0,0,0.05);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  transition: all 0.2s;
+}
+.fibi-minimize-btn:hover {
+  background: rgba(0,0,0,0.1);
+  color: #000;
+}
+
+.fibi-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.fibi-minimized {
+  /* Biarkan lebar widget tetap tapi buang sedikit padding */
+}
+
+.fibi-minimized .fibi-char {
+  display: none !important;
 }
 .fibi-drag-handle:active {
   cursor: grabbing;

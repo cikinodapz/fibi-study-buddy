@@ -5,7 +5,8 @@
   "description": "Pomodoro mengembang di layar dengan Chubby Fibi!",
   "permissions": [
     "storage",
-    "notifications"
+    "notifications",
+    "alarms"
   ],
   "background": {
     "service_worker": "background.js"
