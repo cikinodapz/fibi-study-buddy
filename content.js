@@ -53,12 +53,24 @@ function startAnimation(mode) {
   
   const imgEl = document.getElementById('fibi-img');
   if (imgEl) {
-    imgEl.src = mode === 'focus' ? imgFocusUrl1 : imgBreakUrl1;
+    // Transisi halus: fade out & mengecil
+    imgEl.style.opacity = '0';
+    imgEl.style.transform = 'scale(0.9)';
+    
+    setTimeout(() => {
+      // Ganti gambar setelah fade out selesai
+      if (currentModeAnim === mode) {
+        imgEl.src = mode === 'focus' ? imgFocusUrl1 : imgBreakUrl1;
+        imgEl.style.opacity = '1';
+        imgEl.style.transform = 'scale(1)';
+      }
+    }, 200);
   }
 
   animInterval = setInterval(() => {
     const el = document.getElementById('fibi-img');
-    if (el) {
+    // Hanya animasi jika tidak sedang transisi pergantian mode awal
+    if (el && el.style.opacity !== '0') {
       animToggleState = !animToggleState;
       if (mode === 'focus') {
         el.src = animToggleState ? imgFocusUrl2 : imgFocusUrl1;

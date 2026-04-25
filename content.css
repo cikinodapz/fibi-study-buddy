@@ -20,7 +20,7 @@
   align-items: center;
   box-shadow: 0 5px 15px rgba(0,0,0,0.15);
   width: 125px; /* Sedikit dilebarkan untuk foto yang lebih besar */
-  transition: border-color 0.3s;
+  transition: background-color 0.4s ease-in-out, border-color 0.4s ease-in-out, box-shadow 0.4s ease-in-out;
 }
 
 .fibi-break-mode {
@@ -103,6 +103,7 @@
   max-height: 100%;
   object-fit: contain;
   filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
 }
 
 /* Animasi saat timer jalan */
@@ -156,4 +157,43 @@
 }
 .fibi-controls button:active {
   transform: scale(0.95);
+}
+
+/* ====================================================
+   🌙 DARK MODE SUPPORT
+   ==================================================== */
+@media (prefers-color-scheme: dark) {
+  .fibi-widget {
+    background: rgba(30, 30, 30, 0.85);
+    border-color: #FFB300; /* Warna emas yang lebih cocok di dark mode */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+  }
+  
+  .fibi-widget.fibi-break-mode {
+    background: rgba(35, 50, 35, 0.85);
+    border-color: #66BB6A;
+  }
+
+  .fibi-timer {
+    color: #f1f1f1;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+  }
+
+  .fibi-drag-handle svg {
+    fill: #888;
+  }
+
+  .fibi-drag-handle:hover svg {
+    fill: #ddd !important;
+  }
+
+  .fibi-minimize-btn {
+    color: #aaa;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .fibi-minimize-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.2);
+  }
 }
