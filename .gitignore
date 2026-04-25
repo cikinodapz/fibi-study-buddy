@@ -1,0 +1,16 @@
+# Project specific ignores
+project_review.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Developer tools / IDEs
+.vscode/
+.idea/
+
+# Node (if applicable)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
